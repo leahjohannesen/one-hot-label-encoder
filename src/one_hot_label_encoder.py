@@ -7,31 +7,53 @@ class OneHotLabelEncoder(object):
     you to transform several categorical variables into dummy variables at once, while allowing
     you to save that transformation and apply it to later data.
 
+    Currently it coerces all arrays passed into categorical dummy variables
+
+    Class Parameters
+        missing_dummy:
+            Should a "missing value" dummy be made for each category" to allow for transformation
+            of data so far unseen
+        sparse:
+            Should any output arrays be sparse
+
     Methods
-        fit(x):
-            Accepts a numpy array of shape (n_samples, n_categorical_features)
+        fit(x, categorical_indices='auto', col_names=None):
+            Arguments
+                x:
+                    A numpy array of shape (n_samples x n_features)
+                categorical_indices(default 'auto'):
+                    If a list of indices is provide, attemps to convert those indices otherwise
+                    attempts to automatically recognize if a column is categorical
+                col_names(default None):
+                    A list of all column names. If none, automatically labels columns with their
+                    column number
+                
         transform(x):
-            Acecpts a numpy array of shape (n_samples, n_categorical_features) where the
-            number of categorical features matches the fitted number of categorical feat
-        fit_transform(x):
-            Fits and transforms an array of shape (n_samples, n_categorical_features)
+            Arguments
+                x:
+                    A numpy array of shape (n_samples x n_features)
+       
+         fit_transform(x):
+            Arguments: Takes the same arguments as fit()
 
-    Arguments
+    Attributes
+        categorical_indices_:
+            List of indices that were transformed or 'auto'
         col_names_:
-            list of column names of the whole array being passed
-        missing_dummy_:
-            creates a dummy for missing variables in possible transformed data
-            otherwise ignores "new values" when transforming
-
+            List of column names of initially fitted array
+        classes_:
+            List of column names after Label/OneHot encoding
+        le_list_:
+            List of individual column LabelEncoder()
+        
     '''
-    def __init__(self, categorical_indices='auto', col_names=None, missing_dummy=False,
-                 sparse=False):
-        self.categorical_indices_ = categorical_indices
-        self.col_names_ = col_names
-        self.classes_ = []
+    def __init__(self, missing_dummy=False, sparse=False):
         self.missing_dummy_ = missing_dummy
-        self.le_list_ = []
         self.sparse_ = sparse
+        self.categorical_indices_ = None
+        self.col_names_ = None
+        self.classes_ = []
+        self.le_list_ = []
         
         self._new_col_names = []
         self._fit_shape = None
@@ -56,7 +78,10 @@ class OneHotLabelEncoder(object):
             new_classes.extend(map(lambda x: str(idx) + '_' + x, self._new_col_names[idx]))
         self.classes_ = new_classes
 
-    def fit(self, x):
+    def fit(self, x, categorical_indices='auto', col_names=None):
+        self.categorical_indices_ = categorical_indices
+        self.col_names_ = col_names
+
         try:
             type(x) == type(np.array([]))
         except:
