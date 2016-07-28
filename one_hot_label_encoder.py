@@ -3,10 +3,23 @@ from sklearn.preprocessing import OneHotEncoder, LabelEncoder
 
 class OneHotLabelEncoder(object):
     '''
+    This class combines the functionality of the label encoder and the one hot encoder allowing
+    you to transform several categorical variables into dummy variables at once, while allowing
+    you to save that transformation and apply it to later data.
+
+    Methods
+        fit(x):
+            Accepts a numpy array of shape (n_samples, n_categorical_features)
+        transform(x):
+            Acecpts a numpy array of shape (n_samples, n_categorical_features) where the
+            number of categorical features matches the fitted number of categorical feat
+        fit_transform(x):
+            Fits and transforms an array of shape (n_samples, n_categorical_features)
+
     Arguments
-        col_names:
+        col_names_:
             list of column names of the whole array being passed
-        missing_dummy:
+        missing_dummy_:
             creates a dummy for missing variables in possible transformed data
             otherwise ignores "new values" when transforming
 
