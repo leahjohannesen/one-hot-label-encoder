@@ -24,11 +24,17 @@ class OneHotLabelEncoder(object):
             otherwise ignores "new values" when transforming
 
     '''
-    def __init__(self, categorical_indices='auto', col_names=None, missing_dummy=False):
+    def __init__(self, categorical_indices='auto', col_names=None, missing_dummy=False,
+                 sparse=False):
+        self.categorical_indices_ = categorical_indices
         self.col_names_ = col_names
+        self.classes_ = []
         self.missing_dummy_ = missing_dummy
-        self._fit_shape = None
         self.le_list_ = []
+        self.sparse_ = sparse
+        
+        self._new_col_names = []
+        self._fit_shape = None
         self._ohe_ = None
 
 
@@ -44,6 +50,12 @@ class OneHotLabelEncoder(object):
         row_xform = row_le.transform(row)
         return row_xform
 
+    def _convert_col_names(self):
+        new_classes = []
+        for idx in xrange(len(self.col_names_)):
+            new_classes.extend(map(lambda x: str(idx) + '_' + x, self._new_col_names[idx]))
+        self.classes_ = new_classes
+
     def fit(self, x):
         try:
             type(x) == type(np.array([]))
@@ -58,13 +70,15 @@ class OneHotLabelEncoder(object):
         x_trans = x.T
         array_le = np.zeros(x_trans.shape)
         for i in range(self._fit_shape[1]):
-            row_enc, le, new_col_labels = self._make_le(x_trans[i], i)
+            row_enc, le, new_col_classes = self._make_le(x_trans[i], i)
             self.le_list_.append(le)
             array_le[i] = row_enc
-            
-        self._ohe_ = OneHotEncoder(sparse=False)
+            self._new_col_names.append(new_col_classes)     
+        self._ohe_ = OneHotEncoder(sparse=self.sparse_)
         self._ohe_.fit(array_le.T)
-        #self.col_names_[i,i] = new_cols
+        
+        self._convert_col_names()
+        
         return
 
     def transform(self, x):

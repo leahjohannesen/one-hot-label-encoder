@@ -1,4 +1,4 @@
-from one_hot_label_encoder import OneHotLabelEncoder
+from src.one_hot_label_encoder import OneHotLabelEncoder
 import numpy as np
 
 if __name__ == '__main__':
